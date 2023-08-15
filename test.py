@@ -22,6 +22,19 @@ def search_item(item_name):
     # Search button CLICKED
     driver.find_element(By.ID, 'nav-search-submit-button').click()
 
+
+def extract_product_code(item_element, link):
+    try:
+        product_code = re.search(r"/dp/([A-Z0-9]+)", link).group(1)
+    except AttributeError:
+        try: 
+            product_code = product_code = item_element.find_element(By.XPATH, '//*[@id="detailBullets_feature_div"]/ul/li[5]/span/span[2]')
+        except NoSuchElementException:
+            product_code = None 
+
+    return product_code
+
+
 def scrape_items():
     item_elements = driver.find_elements(By.CSS_SELECTOR, 'div[data-component-type="s-search-result"]')
     print(f'----- TOTAL: {len(item_elements)}-----')
@@ -62,15 +75,17 @@ def scrape_items():
             print("Link:", link)
 
             # extract product ASIN code
-            try:
-                product_code = re.search(r"/dp/([A-Z0-9]+)", link).group(1)
-                print(product_code)
-                items_dict[name_element.text] = product_code
-            except AttributeError:
-                try:
-                    product_code = item_element.find_element(By.XPATH, '//*[@id="detailBullets_feature_div"]/ul/li[5]/span/span[2]')
-                except NoSuchElementException:
-                    pass
+            # try:
+            #     product_code = re.search(r"/dp/([A-Z0-9]+)", link).group(1)
+            #     print(product_code)
+            #     items_dict[name_element.text] = product_code
+            # except AttributeError:
+            #     try:
+            #         product_code = item_element.find_element(By.XPATH, '//*[@id="detailBullets_feature_div"]/ul/li[5]/span/span[2]')
+            #     except NoSuchElementException:
+            #         pass
+            product_code = extract_product_code(item_element, link)
+            print(product_code)
             
             print(f'---COUNT: {count}---')
             print("------------------------")
